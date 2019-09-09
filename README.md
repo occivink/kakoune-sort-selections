@@ -1,6 +1,6 @@
 # kakoune-sort-selections
 
-[kakoune](http://kakoune.org) plugin to sort selections' by their content.
+[kakoune](http://kakoune.org) plugin to sort selections by their content.
 
 ## Setup
 
