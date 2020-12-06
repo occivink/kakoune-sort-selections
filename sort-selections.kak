@@ -1,7 +1,7 @@
 define-command sort-selections -params ..2 -docstring '
-sort-selections [-reverse] [<register>]: sort the selections
+sort-selections [-reverse] [REGISTER]: sort the selections
 Sorting is done numerically if possible, otherwise lexicographically
-If a <register> is specified, the values of the register will be sorted instead,
+If REGISTER is specified, the values of the register will be sorted instead,
 and the resulting order then applied to the selections.
 '%{
     eval %sh{
