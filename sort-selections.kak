@@ -1,25 +1,28 @@
 define-command sort-selections -params ..2 -docstring '
-sort-selections [-reverse] [REGISTER]: sort the selections
+sort-selections [-reverse] [<register>]: sort the selections
 Sorting is done numerically if possible, otherwise lexicographically
-If REGISTER is specified, the values of the register will be sorted instead,
+If <register> is specified, the values of the register will be sorted instead,
 and the resulting order then applied to the selections.
 '%{
+    try %{
+        exec -draft '<a-space>'
+    } catch %{
+        fail 'Only one selection, cannot sort'
+    }
     eval %sh{
         if [ $# -eq 2 ]; then
-            if [ $1 != '-reverse' ]; then
+            if [ "$1" != '-reverse' ]; then
                 printf 'fail "Invalid flag %%arg{1}"'
-            elif [ ${#2} -ne 1 ]; then
-                printf 'fail "Invalid register %%arg{2}"'
             else
-                printf "sort-selections-impl REVERSE INDICES %%reg{$2}"
+                printf "try %%{ nop -- %%reg{%s} } catch %%{ fail 'Invalid register ''%s''' }\n" "$2" "$2"
+                printf "sort-selections-impl REVERSE INDICES %%{%s}" "$2"
             fi
         elif [ $# -eq 1 ]; then
-            if [ $1 = '-reverse' ]; then
+            if [ "$1" = '-reverse' ]; then
                 printf 'sort-selections-impl REVERSE DIRECT'
-            elif [ ${#1} -eq 1 ]; then
-                printf "sort-selections-impl NORMAL INDICES %%reg{$1}"
             else
-                printf 'fail "Invalid flag or register %%arg{1}"'
+                printf "try %%{ nop -- %%reg{%s} } catch %%{ fail 'Invalid register ''%s''' }\n" "$1" "$1"
+                printf "sort-selections-impl NORMAL INDICES %%{%s}" "$1"
             fi
         else
             printf 'sort-selections-impl NORMAL DIRECT'
