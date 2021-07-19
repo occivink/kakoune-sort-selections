@@ -15,11 +15,6 @@ For example, if you want to do case-insensitive sorting, you can first use `` ` 
 
 This plugin also adds the  `reverse-selections`, which is just a shortcut for `sort-selections -reverse '#'`. Since `#` is the selection index register, it just works.
 
-## Limitation
-
-On Linux, the plugin will only work if the total size of the selections is below 128KiB. This is due to the (hardcoded) size limit of environment variables. Other operating systems may have different limits.  
-If the limit is reached, calling `sort-selections` will simply do nothing.
-
 ## License
 
 Unlicense

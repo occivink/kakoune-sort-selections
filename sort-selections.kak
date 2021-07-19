@@ -47,8 +47,23 @@ use Scalar::Util "looks_like_number";
 my $direction = shift;
 my $how = shift;
 
-my @sel_content = shellwords($ENV{"kak_quoted_selections"});
+my $command_fifo_name = $ENV{"kak_command_fifo"};
+my $response_fifo_name = $ENV{"kak_response_fifo"};
 
+my $command_fifo;
+
+open ($command_fifo, '>', $command_fifo_name);
+print $command_fifo "echo -quoting shell -to-file $response_fifo_name -- %val{selections}";
+close($command_fifo);
+
+# slurp the response_fifo content
+my $response_fifo;
+open ($response_fifo, '<', $response_fifo_name);
+my $selections_quoted = do { local $/; <$response_fifo> };
+close($response_fifo);
+
+# parse the shell-quoted selections we got into an array
+my @sel_content = shellwords($selections_quoted);
 
 if ($how eq 'DIRECT') {
     my $all_numbers=1;
@@ -79,7 +94,19 @@ if ($how eq 'DIRECT') {
     }
     print(" ;");
 } else {
-    my @indices = @ARGV;
+    my $register_name = shift;
+
+    open ($command_fifo, '>', $command_fifo_name);
+    print $command_fifo "echo -quoting shell -to-file $response_fifo_name -- %reg{$register_name}";
+    close($command_fifo);
+
+    my $response_fifo;
+    open ($response_fifo, '<', $response_fifo_name);
+    my $register_quoted = do { local $/; <$response_fifo> };
+    close($response_fifo);
+
+    my @indices = shellwords($register_quoted);
+
     if (scalar(@indices) != scalar(@sel_content)) {
         print('fail "The register must contain as many values as selections"');
         exit;
