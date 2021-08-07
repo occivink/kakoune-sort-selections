@@ -50,41 +50,45 @@ my $how = shift;
 my $command_fifo_name = $ENV{"kak_command_fifo"};
 my $response_fifo_name = $ENV{"kak_response_fifo"};
 
-my $command_fifo;
+sub read_array {
+    my $what = shift;
 
-open ($command_fifo, '>', $command_fifo_name);
-print $command_fifo "echo -quoting shell -to-file $response_fifo_name -- %val{selections}";
-close($command_fifo);
+    open (my $command_fifo, '>', $command_fifo_name);
+    print $command_fifo "echo -quoting shell -to-file $response_fifo_name -- $what";
+    close($command_fifo);
 
-# slurp the response_fifo content
-my $response_fifo;
-open ($response_fifo, '<', $response_fifo_name);
-my $selections_quoted = do { local $/; <$response_fifo> };
-close($response_fifo);
+    # slurp the response_fifo content
+    open (my $response_fifo, '<', $response_fifo_name);
+    my $response_quoted = do { local $/; <$response_fifo> };
+    close($response_fifo);
+    return shellwords($response_quoted);
+}
 
-# parse the shell-quoted selections we got into an array
-my @sel_content = shellwords($selections_quoted);
-
-if ($how eq 'DIRECT') {
-    my $all_numbers=1;
-    for my $val (@sel_content) {
+sub all_numbers {
+    my @array = shift;
+    for my $val (@array) {
         if (not looks_like_number($val)) {
-            $all_numbers=0;
-            last;
+            return 0;
         }
     }
+    return 1;
+}
+
+my @selections = read_array("%val{selections}");
+
+if ($how eq 'DIRECT') {
     my @sorted;
     if ($direction eq 'REVERSE') {
-        if ($all_numbers == 1) {
-            @sorted = sort { $b <=> $a; } @sel_content;
+        if (all_numbers(@selections)) {
+            @sorted = sort { $b <=> $a; } @selections;
         } else {
-            @sorted = sort { $b cmp $a; } @sel_content;
+            @sorted = sort { $b cmp $a; } @selections;
         }
     } else {
-        if ($all_numbers == 1) {
-            @sorted = sort { $a <=> $b; } @sel_content;
+        if (all_numbers(@selections)) {
+            @sorted = sort { $a <=> $b; } @selections;
         } else {
-            @sorted = sort { $a cmp $b; } @sel_content;
+            @sorted = sort { $a cmp $b; } @selections;
         }
     }
     print("reg '\"'");
@@ -96,41 +100,25 @@ if ($how eq 'DIRECT') {
 } else {
     my $register_name = shift;
 
-    open ($command_fifo, '>', $command_fifo_name);
-    print $command_fifo "echo -quoting shell -to-file $response_fifo_name -- %reg{$register_name}";
-    close($command_fifo);
+    my @indices = read_array("%reg{$register_name}");
 
-    my $response_fifo;
-    open ($response_fifo, '<', $response_fifo_name);
-    my $register_quoted = do { local $/; <$response_fifo> };
-    close($response_fifo);
-
-    my @indices = shellwords($register_quoted);
-
-    if (scalar(@indices) != scalar(@sel_content)) {
+    if (scalar(@indices) != scalar(@selections)) {
         print('fail "The register must contain as many values as selections"');
         exit;
     }
-    my $all_numbers=1;
-    for my $val (@indices) {
-        if (not looks_like_number($val)) {
-            $all_numbers=0;
-            last;
-        }
-    }
     my @pairs;
     for my $i (0 .. scalar(@indices) - 1) {
-        push(@pairs, [ $indices[$i], $sel_content[$i] ] );
+        push(@pairs, [ $indices[$i], $selections[$i] ] );
     }
     my @sorted;
     if ($direction eq 'REVERSE') {
-        if ($all_numbers == 1) {
+        if (all_numbers(@indices)) {
             @sorted = sort { @$b[0] <=> @$a[0]; } @pairs;
         } else {
             @sorted = sort { @$b[0] cmp @$a[0]; } @pairs;
         }
     } else {
-        if ($all_numbers == 1) {
+        if (all_numbers(@indices)) {
             @sorted = sort { @$a[0] <=> @$b[0]; } @pairs;
         } else {
             @sorted = sort { @$a[0] cmp @$b[0]; } @pairs;
