@@ -36,7 +36,6 @@ reverse-selections: reverses the order of all selections
 
 define-command sort-selections-impl -hidden -params .. %{
     eval -save-regs '"' %{
-        reg dquote %val{selections} # safety net, not strictly necessary
         eval %sh{
 perl - "$@" <<'EOF'
 use strict;
