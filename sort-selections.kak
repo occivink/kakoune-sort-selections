@@ -5,7 +5,7 @@ If <register> is specified, the values of the register will be sorted instead,
 and the resulting order then applied to the selections.
 ' %{
     try %{
-        exec -draft '<a-space>'
+        exec -draft '<a-space><esc><a-,><esc>'
     } catch %{
         fail 'Only one selection, cannot sort'
     }
@@ -90,7 +90,7 @@ if ($how eq 'DIRECT') {
             @sorted = sort { $a cmp $b; } @selections;
         }
     }
-    print("reg '\"'");
+    print("reg dquote");
     for my $sel (@sorted) {
         $sel =~ s/'/''/g;
         print(" '$sel'");
@@ -123,7 +123,7 @@ if ($how eq 'DIRECT') {
             @sorted = sort { @$a[0] cmp @$b[0]; } @pairs;
         }
     }
-    print("reg '\"'");
+    print("reg dquote");
     for my $pair (@sorted) {
         my $sel = @$pair[1];
         $sel =~ s/'/''/g;
