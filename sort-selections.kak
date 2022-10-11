@@ -34,6 +34,15 @@ define-command reverse-selections -docstring '
 reverse-selections: reverses the order of all selections
 ' %{ sort-selections -reverse '#' }
 
+define-command shuffle-selections -docstring '
+shuffle-selections: randomizes the order of all selections
+' %{
+    eval -save-regs '"' %{
+        eval reg dquote %sh{ echo "$kak_reg_hash" | tr ' ' '\n' | shuf | tr '\n' ' ' }
+        sort-selections '"'
+    }
+}
+
 define-command sort-selections-impl -hidden -params .. %{
     eval -save-regs '"' %{
         eval %sh{
