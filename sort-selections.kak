@@ -49,7 +49,6 @@ define-command sort-selections-impl -hidden -params .. %{
 perl - "$@" <<'EOF'
 use strict;
 use warnings;
-use Text::ParseWords "shellwords";
 use Scalar::Util "looks_like_number";
 
 my $direction = shift;
@@ -57,6 +56,31 @@ my $how = shift;
 
 my $command_fifo_name = $ENV{"kak_command_fifo"};
 my $response_fifo_name = $ENV{"kak_response_fifo"};
+
+sub parse_shell_quoted {
+    my $str = shift;
+    my @res;
+    my $elem = "";
+    while (1) {
+        if ($str !~ m/\G'([\S\s]*?)'/gc) {
+            exit(1);
+        }
+        $elem .= $1;
+        if ($str =~ m/\G *$/gc) {
+            push(@res, $elem);
+            $elem = "";
+            last;
+        } elsif ($str =~ m/\G\\'/gc) {
+            $elem .= "'";
+        } elsif ($str =~ m/\G */gc) {
+            push(@res, $elem);
+            $elem = "";
+        } else {
+            exit(1);
+        }
+    }
+    return @res;
+}
 
 sub read_array {
     my $what = shift;
@@ -69,7 +93,7 @@ sub read_array {
     open (my $response_fifo, '<', $response_fifo_name);
     my $response_quoted = do { local $/; <$response_fifo> };
     close($response_fifo);
-    return shellwords($response_quoted);
+    return parse_shell_quoted($response_quoted);
 }
 
 sub all_numbers {
