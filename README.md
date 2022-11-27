@@ -18,6 +18,11 @@ This plugin also adds the following two commands based on `sort-selections`:
 * `reverse-selections`, which is just a shortcut for `sort-selections -reverse '#'`. Since `#` is the selection index register, it just works.
 * `shuffle-selections`, which randomizes the order of all the current selections.
 
+## Tests
+
+The `test.kak` file contains tests for the plugin. To execute these tests, simply run `kak -n -e 'source test.kak ; exit'`: if the kakoune instance stays open, the tests have somehow failed and the current state can be inspected.
+
+
 ## License
 
 Unlicense
