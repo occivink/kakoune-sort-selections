@@ -27,6 +27,15 @@ sort-selections -reverse
 assert-buffer-content-is "'foo baz bar'"
 exec '%d'
 
+# do a simple sort (and reverse sort) of '10' '30' '0' '100'
+exec i10<space>30<space>0<space>100<esc>
+exec '%s\w+<ret>'
+sort-selections
+assert-buffer-content-is "'0 10 30 100'"
+sort-selections -reverse
+assert-buffer-content-is "'100 30 10 0'"
+exec '%d'
+
 # do a sort based on the register content (which is the number we yanked previously)
 exec ifoo2<space>bar3<space>baz1<esc>
 exec -save-regs '' '%s\d<ret>y' # yank the number
