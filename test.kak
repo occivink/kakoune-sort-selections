@@ -40,14 +40,14 @@ exec '%d'
 exec ifoo2<space>bar3<space>baz1<esc>
 exec -save-regs '' '%s\d<ret>y' # yank the number
 exec '%s\w+<ret>' # select the entire words
-sort-selections 'dquote'
+sort-selections -register 'dquote'
 assert-buffer-content-is "'baz1 foo2 bar3'"
 # re-select: since we didn't change the dquote register, the sort-selections call is not idempotent
-sort-selections 'dquote'
+sort-selections -register 'dquote'
 assert-buffer-content-is "'bar3 baz1 foo2'"
 exec -save-regs '' '%s\d<ret>y' # re-yank the number
 exec '%s\w+<ret>'
-sort-selections -reverse 'dquote'
+sort-selections -reverse -register 'dquote'
 assert-buffer-content-is "'bar3 foo2 baz1'"
 exec '%d'
 
