@@ -229,7 +229,6 @@ if ($register eq '') {
 my $how = ($by_number == 1 ? "numerically" : "lexicographically");
 my $target = ($register eq '' ? "content" : "index");
 my $count = scalar(@selections);
-my $dry = scalar(@selections);
 print("echo -markup '{Information}Sorted $count selections $how by $target");
 if ($dry_run != 0) {
     print(" (dry-run)");
